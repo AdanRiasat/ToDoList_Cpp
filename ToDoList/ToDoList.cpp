@@ -5,6 +5,37 @@
 #include <string>
 #include <cstdlib>
 
+namespace Messages {
+    /// <summary>
+    /// Error messages
+    /// </summary>
+    const std::string notNum = "Invalid input. Please enter a number.\n";
+    const std::string invalidNum = "Invalid choice.\n";
+    const std::string listEmpty = "List is empty\n";
+
+    /// <summary>
+    /// Other messages
+    /// </summary>
+    const std::string taskDeleted = "Task deleted\n";
+    const std::string taskCompleted = "has been marked as done\n";
+}
+
+
+void printMenu() {
+    std::cout << "\n===== TO-DO MENU =====\n";
+    std::cout << "1. Add Task\n";
+    std::cout << "2. View Tasks\n";
+    std::cout << "3. Mark Task as Done\n";
+    std::cout << "4. Delete Task\n";
+    std::cout << "5. Exit\n";
+    std::cout << "==================\n";
+}
+
+void refreshUI() {
+    system("cls");
+    printMenu();
+}
+
 
 class LinkedList {
     private:
@@ -21,33 +52,20 @@ class LinkedList {
                 done = false;
                 nextPtr = NULL;
             }
-
-            ~ListNode() {
-                
-            }
         };
         ListNode* head;
 
     public:
-        static void printMenu() {
-            std::cout << "\n===== TO-DO MENU =====\n";
-            std::cout << "1. Add Task\n";
-            std::cout << "2. View Tasks\n";
-            std::cout << "3. Mark Task as Done\n";
-            std::cout << "4. Delete Task\n";
-            std::cout << "5. Exit\n";
-            std::cout << "==================\n";
-        }
+        
 
         LinkedList() {
             head = NULL;
         }
 
-        void append(std::string pTitle, std::string pDesc) {
+        void append(std::string& pTitle, std::string& pDesc) {
             if (head == NULL) {
                 head = new ListNode(pTitle, pDesc);
-                system("cls");
-                printMenu();
+                refreshUI();
                 return;
             }
             ListNode* tmp = head;
@@ -55,8 +73,7 @@ class LinkedList {
                 tmp = tmp->nextPtr;
             }
             tmp->nextPtr = new ListNode(pTitle, pDesc);
-            system("cls");
-            printMenu();
+            refreshUI();
         }
 
         void display() {
@@ -82,23 +99,20 @@ class LinkedList {
             
             if (tmp != NULL) {
                 tmp->done = true;
-                system("cls");
-                printMenu();
-                std::cout << tmp->title << " has been marked as done\n";
+                refreshUI();
+                std::cout << tmp->title << " " << Messages::taskCompleted;
             } 
             else {
-                system("cls");
-                printMenu();
-                std::cout << "Invalid task number\n";
+                refreshUI();
+                std::cout << Messages::invalidNum;
             }
             
         }
 
-        void remove(int index) {
+        void deleteTask(int index) {
             if (head == NULL) {
-                system("cls");
-                printMenu();
-                std::cout << "List is empty\n";
+                refreshUI();
+                std::cout << Messages::listEmpty;
                 return;
             }
 
@@ -106,9 +120,8 @@ class LinkedList {
                 ListNode* toDelete = head;
                 head = head->nextPtr;
                 delete toDelete;
-                system("cls");
-                printMenu();
-                std::cout << "Task deleted\n";
+                refreshUI();
+                std::cout << Messages::taskDeleted;
                 return;
             }
 
@@ -120,18 +133,16 @@ class LinkedList {
             }
 
             if (tmp == NULL || tmp->nextPtr == NULL) {
-                system("cls");
-                printMenu();
-                std::cout << "Invalid task number.\n";
+                refreshUI();
+                std::cout << Messages::invalidNum;
                 return;
             }
 
             ListNode* toDelete = tmp->nextPtr;
             tmp->nextPtr = toDelete->nextPtr;
             delete toDelete;
-            system("cls");
-            printMenu();
-            std::cout << "Task deleted.\n";
+            refreshUI();
+            std::cout << Messages::taskDeleted;
         }
 
         ~LinkedList() {
@@ -144,24 +155,43 @@ class LinkedList {
         }
 };
 
+int getInput(const std::string& prompt) {
+    std::string input;
+    std::cout << prompt;
+    std::getline(std::cin, input);
+    try {
+        return std::stoi(input);
+    }
+    catch (...) {
+        refreshUI();
+        std::cout << Messages::notNum;
+        return -1;
+    }
+}
+
 
 int main()
 {
+    
+
     LinkedList todo;
     int choice;
     std::string title;
     std::string desc;
     int taskId;
 
-    LinkedList::printMenu();
+    printMenu();
     
     
 
     while (true) {
-       
+        std::string input;
         std::cout << "Choose an option: ";
-        std::cin >> choice;
-        std::cin.ignore(); // clear newline
+        
+        choice = getInput("Choose an option: ");
+        if (choice == -1) {
+            continue;
+        }
 
         switch (choice) {
         case 1:
@@ -173,25 +203,31 @@ int main()
             std::cout << "New task has been added\n";
             break;
         case 2:
-            system("cls");
-            LinkedList::printMenu();
+            refreshUI();
             todo.display();
             break;
         case 3:
-            std::cout << "Enter task title to mark as done: ";
-            std::cin >> taskId;
-            todo.markDone(taskId);
+            taskId = getInput("Enter task number to mark as done: ");
+
+            if (taskId != -1) {
+                todo.markDone(taskId);
+            }
+
             break;
         case 4:
-            std::cout << "Enter task number to delete: ";
-            std::cin >> taskId;
-            todo.remove(taskId);
+            taskId = getInput("Enter task number to delete: ");
+
+            if (taskId != -1) {
+                todo.deleteTask(taskId);
+            }
+
             break;
         case 5:
             std::cout << "Exiting...\n";
             return 0;
         default:
-            std::cout << "Invalid choice.\n";
+            refreshUI();
+            std::cout << Messages::invalidNum;
         }
     }
 }
