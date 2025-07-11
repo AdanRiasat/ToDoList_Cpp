@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <cstdlib>
+#include "MenuChoice.h"
 
 namespace Messages {
     /// <summary>
@@ -172,29 +173,26 @@ int getInput(const std::string& prompt) {
 
 int main()
 {
-    
-
     LinkedList todo;
-    int choice;
+    int numericChoice;
+    MenuChoice choice;
     std::string title;
     std::string desc;
     int taskId;
 
     printMenu();
     
-    
 
     while (true) {
-        std::string input;
-        std::cout << "Choose an option: ";
-        
-        choice = getInput("Choose an option: ");
-        if (choice == -1) {
+        numericChoice = getInput("Choose an option: ");
+        if (numericChoice == -1) {
             continue;
         }
 
+        choice = static_cast<MenuChoice>(numericChoice);
+
         switch (choice) {
-        case 1:
+        case MenuChoice::Add:
             std::cout << "Enter task title: ";
             std::getline(std::cin, title);
             std::cout << "Enter task description: ";
@@ -202,11 +200,11 @@ int main()
             todo.append(title, desc);
             std::cout << "New task has been added\n";
             break;
-        case 2:
+        case MenuChoice::View:
             refreshUI();
             todo.display();
             break;
-        case 3:
+        case MenuChoice::MarkDone:
             taskId = getInput("Enter task number to mark as done: ");
 
             if (taskId != -1) {
@@ -214,7 +212,7 @@ int main()
             }
 
             break;
-        case 4:
+        case MenuChoice::Delete:
             taskId = getInput("Enter task number to delete: ");
 
             if (taskId != -1) {
@@ -222,7 +220,7 @@ int main()
             }
 
             break;
-        case 5:
+        case MenuChoice::Exit:
             std::cout << "Exiting...\n";
             return 0;
         default:
